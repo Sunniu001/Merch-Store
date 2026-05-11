@@ -1,5 +1,7 @@
 import "./globals.css";
-import { ChakraProvider } from "@chakra-ui/react";
+import { CartProvider } from "./context/CartContext";
+import CartDrawer from "./components/CartDrawer";
+import WishlistDrawer from "./components/WishlistDrawer";
 
 export const metadata = {
   title: "HIPPIE ALIENS 👽✌️",
@@ -10,8 +12,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Fredoka+One&family=Caveat:wght@700&display=swap" rel="stylesheet" />
+      </head>
       <body>
-        <ChakraProvider>{children}</ChakraProvider>
+        <CartProvider>
+          <CartDrawer />
+          <WishlistDrawer />
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

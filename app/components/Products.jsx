@@ -1,40 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SectionHeader from "./SectionHeader";
-
-const products = [
-  {
-    emoji: "👽", bg: "#080010", badge: { text: "🔥 LIMITED", type: "fire" },
-    name: "Grand Theft Alien — Area 51", type: "Unisex 100% Cotton Tee ✓",
-    price: "₹549", was: "₹799", saved: "save ₹250",
-    hoverBorder: "rgba(168,212,0,0.4)", rotate: "0deg",
-  },
-  {
-    emoji: "💥", bg: "#040a04", badge: { text: "lmao 😭", type: "lol" },
-    name: "Big Baong", type: "Premium UV Sticker ✓",
-    price: "₹49", was: "₹79", saved: "save ₹30",
-    hoverBorder: "rgba(204,47,160,0.4)", rotate: "1deg",
-  },
-  {
-    emoji: "🪐", bg: "#040810", badge: { text: "🔥 LIMITED", type: "fire" },
-    name: "Peace on Mars Festival", type: "Unisex 100% Cotton Tee ✓",
-    price: "₹549", was: "₹799", saved: "save ₹250",
-    hoverBorder: "rgba(0,184,204,0.4)", rotate: "0deg",
-  },
-  {
-    emoji: "🔑", bg: "#0a0800", badge: null,
-    name: "Hacker Key Ring", type: "Metal Key Chain ✓",
-    price: "₹149", was: "₹199", saved: "save ₹50",
-    hoverBorder: "rgba(204,184,0,0.4)", rotate: "-1deg",
-  },
-  {
-    emoji: "🌌", bg: "#080014", badge: { text: "✨ NEW", type: "new" },
-    name: "Cosmic Pulse Hoodie", type: "Unisex 100% Cotton Hoodie ✓",
-    price: "₹1,499", was: "₹1,599", saved: "save ₹100",
-    hoverBorder: "rgba(138,94,204,0.4)", rotate: "0deg",
-  },
-];
+import { useCart } from "../context/CartContext";
+import Link from "next/link";
 
 const badgeStyles = {
   fire: { bg: "rgba(212,85,0,0.15)",    color: "var(--orange)", border: "1px solid rgba(212,85,0,0.4)" },
@@ -50,10 +19,16 @@ const decos = [
 ];
 
 function ProductCard({ p }) {
+  const { addToCart, toggleWishlist, wishlist } = useCart();
   const [hovered, setHovered] = useState(false);
   const [added, setAdded]   = useState(false);
 
-  const handleAdd = () => {
+  const isWishlisted = wishlist.some(item => item.id === p.id);
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(p);
     setAdded(true);
     setTimeout(() => setAdded(false), 1600);
   };
@@ -64,90 +39,134 @@ function ProductCard({ p }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         background: "var(--card-bg)",
-        border: `1px solid ${hovered ? p.hoverBorder : "var(--border)"}`,
+        border: `1px solid ${hovered ? p.hoverBorder || "var(--lime)" : "var(--border)"}`,
         borderRadius: "20px", overflow: "hidden", cursor: "pointer",
-        transform: hovered ? `translate(-4px,-4px) rotate(-1deg)` : `rotate(${p.rotate})`,
+        transform: hovered ? `translate(-4px,-4px) rotate(-1deg)` : `rotate(${p.rotate || "0deg"})`,
         transition: "transform 0.2s, border-color 0.2s",
+        position: "relative"
       }}
     >
-      {/* image area */}
-      <div style={{
-        height: "200px", background: p.bg,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        position: "relative", borderBottom: "1px solid var(--border)",
-      }}>
-        <span style={{ fontSize: "7rem", lineHeight: 1, animation: "bounce 2s ease-in-out infinite" }}>
-          {p.emoji}
-        </span>
-        {p.badge && (
-          <span style={{
-            position: "absolute", top: "10px", right: "10px",
-            fontFamily: "var(--font-hand)", fontSize: "0.85rem", fontWeight: 700,
-            padding: "0.2rem 0.7rem", borderRadius: "999px",
-            transform: "rotate(4deg)",
-            ...badgeStyles[p.badge.type],
-          }}>
-            {p.badge.text}
-          </span>
-        )}
-      </div>
+      <button 
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(p); }}
+        style={{
+          position: "absolute", top: "12px", left: "12px", zIndex: 10,
+          background: "rgba(0,0,0,0.3)", border: "none", borderRadius: "50%",
+          width: "32px", height: "32px", display: "flex", alignItems: "center",
+          justifyContent: "center", cursor: "pointer", backdropFilter: "blur(4px)",
+          color: isWishlisted ? "var(--pink)" : "white"
+        }}
+      >
+        {isWishlisted ? "❤️" : "🤍"}
+      </button>
 
-      {/* body */}
-      <div style={{ padding: "1.2rem" }}>
-        <div style={{ fontFamily: "var(--font-wack)", fontSize: "1.15rem", lineHeight: 1.2, marginBottom: "0.3rem", color: "var(--text)" }}>
-          {p.name}
-        </div>
-        <div style={{ fontFamily: "var(--font-fun)", fontSize: "0.82rem", color: "var(--muted)", marginBottom: "0.75rem" }}>
-          {p.type}
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
-          <span style={{ fontFamily: "var(--font-wack)", fontSize: "1.4rem", color: "var(--lime)" }}>{p.price}</span>
-          <span style={{ fontFamily: "var(--font-fun)", fontSize: "0.85rem", color: "var(--muted)", textDecoration: "line-through" }}>{p.was}</span>
-          <span style={{
-            background: "rgba(168,212,0,0.08)", color: "var(--lime)",
-            fontFamily: "var(--font-hand)", fontSize: "0.75rem", fontWeight: 700,
-            padding: "0.1rem 0.5rem", borderRadius: "999px",
-            border: "1px solid rgba(168,212,0,0.25)",
-          }}>{p.saved}</span>
+      <Link href={`/product/${p.id}`} style={{ textDecoration: "none" }}>
+        {/* image area */}
+        <div style={{
+          height: "200px", background: p.bg || "var(--bg2)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          position: "relative", borderBottom: "1px solid var(--border)",
+        }}>
+          {p.image ? (
+             <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <span style={{ fontSize: "7rem", lineHeight: 1, animation: "bounce 2s ease-in-out infinite" }}>
+              {p.emoji || "📦"}
+            </span>
+          )}
+          {p.badge && (
+            <span style={{
+              position: "absolute", top: "10px", right: "10px",
+              fontFamily: "var(--font-hand)", fontSize: "0.85rem", fontWeight: 700,
+              padding: "0.2rem 0.7rem", borderRadius: "999px",
+              transform: "rotate(4deg)",
+              ...badgeStyles[p.badge.type],
+            }}>
+              {p.badge.text}
+            </span>
+          )}
         </div>
 
-        <button
-          onClick={handleAdd}
-          style={{
-            width: "100%",
-            background: added ? "var(--green)" : "rgba(255,255,255,0.04)",
-            color: added ? "#000" : "var(--text)",
-            border: `1px solid ${added ? "var(--green)" : "var(--border)"}`,
-            borderRadius: "999px", padding: "0.65rem",
-            fontFamily: "var(--font-wack)", fontSize: "1rem", cursor: "pointer",
-            transition: "all 0.2s",
-          }}
-          onMouseEnter={e => {
-            if (!added) {
-              e.currentTarget.style.background = "var(--lime)";
-              e.currentTarget.style.borderColor = "var(--lime)";
-              e.currentTarget.style.color = "#000";
-              e.currentTarget.style.transform = "scale(1.03)";
-            }
-          }}
-          onMouseLeave={e => {
-            if (!added) {
-              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-              e.currentTarget.style.borderColor = "var(--border)";
-              e.currentTarget.style.color = "var(--text)";
-              e.currentTarget.style.transform = "none";
-            }
-          }}
-        >
-          {added ? "✓ slay! added 💅" : "+ add to cart 🛒"}
-        </button>
-      </div>
+        {/* body */}
+        <div style={{ padding: "1.2rem" }}>
+          <div style={{ fontFamily: "var(--font-wack)", fontSize: "1.15rem", lineHeight: 1.2, marginBottom: "0.3rem", color: "var(--text)" }}>
+            {p.name}
+          </div>
+          <div style={{ fontFamily: "var(--font-fun)", fontSize: "0.82rem", color: "var(--muted)", marginBottom: "0.75rem" }}>
+            {p.type}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
+            <span style={{ fontFamily: "var(--font-wack)", fontSize: "1.4rem", color: "var(--lime)" }}>{p.price}</span>
+            {p.was && (
+              <span style={{ fontFamily: "var(--font-fun)", fontSize: "0.85rem", color: "var(--muted)", textDecoration: "line-through" }}>{p.was}</span>
+            )}
+            {p.saved && (
+              <span style={{
+                background: "rgba(168,212,0,0.08)", color: "var(--lime)",
+                fontFamily: "var(--font-hand)", fontSize: "0.75rem", fontWeight: 700,
+                padding: "0.1rem 0.5rem", borderRadius: "999px",
+                border: "1px solid rgba(168,212,0,0.25)",
+              }}>{p.saved}</span>
+            )}
+          </div>
+
+          <button
+            onClick={handleAdd}
+            style={{
+              width: "100%",
+              background: added ? "var(--green)" : "rgba(255,255,255,0.04)",
+              color: added ? "#000" : "var(--text)",
+              border: `1px solid ${added ? "var(--green)" : "var(--border)"}`,
+              borderRadius: "999px", padding: "0.65rem",
+              fontFamily: "var(--font-wack)", fontSize: "1rem", cursor: "pointer",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={e => {
+              if (!added) {
+                e.currentTarget.style.background = "var(--lime)";
+                e.currentTarget.style.borderColor = "var(--lime)";
+                e.currentTarget.style.color = "#000";
+                e.currentTarget.style.transform = "scale(1.03)";
+              }
+            }}
+            onMouseLeave={e => {
+              if (!added) {
+                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.color = "var(--text)";
+                e.currentTarget.style.transform = "none";
+              }
+            }}
+          >
+            {added ? "✓ slay! added 💅" : "+ add to cart 🛒"}
+          </button>
+        </div>
+      </Link>
     </div>
   );
 }
 
 export default function Products() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function getProducts() {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setProducts(data);
+        }
+      } catch (err) {
+        console.error("Failed to load products:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    getProducts();
+  }, []);
+
   return (
     <section id="products" style={{
       padding: "5rem 2rem", position: "relative", zIndex: 1, background: "var(--bg)", 
@@ -178,7 +197,27 @@ export default function Products() {
         gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))",
         gap: "1.5rem", maxWidth: "1440px", margin: "0 auto",
       }}>
-        {products.map((p, i) => <ProductCard key={i} p={p} />)}
+        {loading ? (
+          <div style={{
+            gridColumn: "1 / -1", textAlign: "center", padding: "4rem",
+            background: "rgba(255,255,255,0.02)", borderRadius: "20px",
+            border: "1px dashed var(--border)", color: "var(--muted)",
+            fontFamily: "var(--font-hand)", fontSize: "1.5rem"
+          }}>
+            fetching the latest drip... 🛸
+          </div>
+        ) : products.length > 0 ? (
+          products.map((p, i) => <ProductCard key={i} p={p} />)
+        ) : (
+          <div style={{
+            gridColumn: "1 / -1", textAlign: "center", padding: "4rem",
+            background: "rgba(255,255,255,0.02)", borderRadius: "20px",
+            border: "1px dashed var(--border)", color: "var(--muted)",
+            fontFamily: "var(--font-hand)", fontSize: "1.5rem"
+          }}>
+            no drops found right now... 👽
+          </div>
+        )}
 
         {/* hype card */}
         <div style={{

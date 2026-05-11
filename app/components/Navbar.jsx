@@ -1,13 +1,31 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useCart } from "../context/CartContext";
+
+const WishlistIcon = ({ count }) => (
+  <div style={{ position: "relative", display: "inline-flex" }}>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill={count > 0 ? "var(--pink)" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+    {count > 0 && (
+      <span style={{
+        position: "absolute", top: "-6px", right: "-8px",
+        background: "var(--lime)", color: "#000",
+        fontSize: "0.6rem", fontWeight: 700, minWidth: "16px", height: "16px",
+        borderRadius: "999px", display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "0 3px", fontFamily: "var(--font-wack)",
+      }}>
+        {count}
+      </span>
+    )}
+  </div>
+);
 
 const CartIcon = ({ count }) => (
   <div style={{ position: "relative", display: "inline-flex" }}>
     <svg
-      width="26"
-      height="26"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -71,12 +89,13 @@ const HamburgerIcon = ({ open }) => (
 );
 
 export default function Navbar() {
-  const [cartCount, setCartCount] = useState(0);
+  const { cart, wishlist, setIsCartOpen, setIsWishlistOpen } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const links = [
-    ["/home", "Home"],
+    ["/", "Home"],
+    ["/orders", "My Orders"],
     ["/about", "About"],
     ["/faq", "Help"],
   ];
@@ -115,13 +134,14 @@ export default function Navbar() {
     background: "transparent",
     border: "1px solid var(--border)",
     borderRadius: "999px",
-    padding: "0.4rem 0.7rem",
+    padding: "0.4rem 0.6rem",
     color: "var(--text)",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     transition: "all 0.15s",
+    position: "relative"
   };
 
   return (
@@ -142,8 +162,8 @@ export default function Navbar() {
           background: rgba(168,212,0,0.06) !important;
           transform: rotate(-2deg) scale(1.05) !important;
         }
-        .cart-btn:hover { transform: translate(-2px,-2px) !important; }
-        .cart-btn:active { transform: translate(1px,1px) !important; }
+        .icon-btn:hover { transform: translate(-2px,-2px) !important; border-color: var(--lime) !important; }
+        .icon-btn:active { transform: translate(1px,1px) !important; }
         .login-btn:hover {
           background: rgba(168,212,0,0.1) !important;
           border-color: rgba(168,212,0,0.5) !important;
@@ -218,15 +238,14 @@ export default function Navbar() {
               listStyle: "none",
               margin: 0,
               padding: 0,
-              // Hidden on mobile via inline media — handled with a wrapper trick below
             }}
             className="desktop-links"
           >
             {links.map(([href, label]) => (
               <li key={href}>
-                <a href={href} className="nav-link" style={linkStyle}>
+                <Link href={href} className="nav-link" style={linkStyle}>
                   {label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -240,19 +259,28 @@ export default function Navbar() {
               flexShrink: 0,
             }}
           >
+            {/* Wishlist icon button */}
+            <button
+              className="icon-btn"
+              style={iconBtnStyle}
+              onClick={() => setIsWishlistOpen(true)}
+              aria-label={`Wishlist, ${wishlist.length} items`}
+            >
+              <WishlistIcon count={wishlist.length} />
+            </button>
 
             {/* Cart icon button */}
             <button
-              className="cart-btn"
+              className="icon-btn"
               style={iconBtnStyle}
-              onClick={() => setCartCount((c) => c + 1)}
-              aria-label={`Cart, ${cartCount} items`}
+              onClick={() => setIsCartOpen(true)}
+              aria-label={`Cart, ${cart.length} items`}
             >
-              <CartIcon count={cartCount} />
+              <CartIcon count={cart.length} />
             </button>
 
             {/* Login — desktop only */}
-            <a
+            <Link
               href="/login"
               className="login-btn"
               style={{
@@ -263,7 +291,8 @@ export default function Navbar() {
               }}
             >
               Login
-            </a>
+            </Link>
+
             {/* Hamburger — only visible on mobile */}
             <button
               className="hamburger-btn"
@@ -292,7 +321,7 @@ export default function Navbar() {
             }}
           >
             {links.map(([href, label]) => (
-              <a
+              <Link
                 key={href}
                 href={href}
                 className="mobile-nav-link"
@@ -304,9 +333,9 @@ export default function Navbar() {
                 }}
               >
                 {label}
-              </a>
+              </Link>
             ))}
-            <a
+            <Link
               href="/login"
               className="mobile-nav-link"
               onClick={() => setMenuOpen(false)}
@@ -321,20 +350,17 @@ export default function Navbar() {
               }}
             >
               Login
-            </a>
+            </Link>
           </div>
         )}
       </nav>
 
-      {/* Responsive CSS injected as a style tag */}
       <style>{`
-        /* Desktop: show nav links + login, hide hamburger */
         @media (min-width: 768px) {
           .desktop-links { display: flex !important; }
           .hamburger-btn { display: none !important; }
           .login-btn { display: block !important; }
         }
-        /* Mobile/mid: hide desktop nav links + login, show hamburger */
         @media (max-width: 767px) {
           .desktop-links { display: none !important; }
           .hamburger-btn { display: flex !important; }
