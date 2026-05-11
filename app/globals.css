@@ -1,49 +1,202 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@import url("https://fonts.googleapis.com/css2?family=Boogaloo&family=Fredoka+One&family=Caveat:wght@700&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --lime: #a8d400;
+  --pink: #cc2fa0;
+  --sky: #00b8cc;
+  --orange: #d45500;
+  --purple: #8a5ecc;
+  --green: #00cc78;
+  --yellow: #ccb800;
+  --bg: #000000;
+  --bg2: #050505;
+  --card-bg: #0a0a0a;
+  --text: #e8e4ff;
+  --muted: #555566;
+  --border: rgba(255, 255, 255, 0.08);
+  --font-wack: "Fredoka One", cursive;
+  --font-hand: "Caveat", cursive;
+  --font-fun: "Boogaloo", cursive;
+}
+
+
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-fun);
+  overflow-x: hidden;
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='20' rx='9' ry='11' fill='%23a8d400' stroke='%23000000' stroke-width='2'/%3E%3Cellipse cx='16' cy='13' rx='12' ry='9' fill='%23a8d400' stroke='%23000000' stroke-width='2'/%3E%3Cellipse cx='11' cy='12' rx='3.5' ry='4' fill='%23000000'/%3E%3Cellipse cx='21' cy='12' rx='3.5' ry='4' fill='%23000000'/%3E%3Cellipse cx='11' cy='13' rx='1.5' ry='2' fill='%238a5ecc'/%3E%3Cellipse cx='21' cy='13' rx='1.5' ry='2' fill='%2300b8cc'/%3E%3C/svg%3E")
+      16 16,
+    auto;
+}
+
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(
+      1px 1px at 12% 18%,
+      rgba(255, 255, 255, 0.4) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 33% 55%,
+      rgba(255, 255, 255, 0.3) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 55% 12%,
+      rgba(168, 212, 0, 0.4) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 70% 70%,
+      rgba(255, 255, 255, 0.25) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 88% 25%,
+      rgba(0, 184, 204, 0.3) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 22% 80%,
+      rgba(255, 255, 255, 0.35) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 48% 40%,
+      rgba(138, 94, 204, 0.4) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 78% 90%,
+      rgba(255, 255, 255, 0.25) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 92% 60%,
+      rgba(255, 255, 255, 0.3) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 5% 45%,
+      rgba(255, 255, 255, 0.25) 0%,
+      transparent 100%
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(8deg);
   }
 }
-
-html {
-  height: 100%;
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@keyframes floatAlien {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-18px) rotate(3deg);
+  }
 }
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+@keyframes morph1 {
+  0%,
+  100% {
+    border-radius: 60% 40% 55% 45%/50% 60% 40% 50%;
+  }
+  50% {
+    border-radius: 40% 60% 35% 65%/60% 40% 60% 40%;
+  }
 }
-
-a {
-  color: inherit;
-  text-decoration: none;
+@keyframes morph2 {
+  0%,
+  100% {
+    border-radius: 40% 60% 30% 70%/60% 30% 70% 40%;
+  }
+  50% {
+    border-radius: 70% 30% 60% 40%/40% 70% 30% 60%;
+  }
 }
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.1;
+    transform: scale(0.5);
+  }
+}
+@keyframes sparklePop {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  50% {
+    transform: scale(1.4) rotate(20deg);
+  }
+}
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes floatDeco {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  50% {
+    transform: translateY(-14px) rotate(15deg);
+  }
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
