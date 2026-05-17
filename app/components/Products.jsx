@@ -1,28 +1,72 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import SectionHeader from "./SectionHeader";
 import { useCart } from "../context/CartContext";
 import Link from "next/link";
 
-const badgeStyles = {
-  fire: { bg: "rgba(212,85,0,0.15)",    color: "var(--orange)", border: "1px solid rgba(212,85,0,0.4)" },
-  new:  { bg: "rgba(168,212,0,0.1)",    color: "var(--lime)",   border: "1px solid rgba(168,212,0,0.35)" },
-  lol:  { bg: "rgba(138,94,204,0.12)",  color: "var(--purple)", border: "1px solid rgba(138,94,204,0.35)" },
+const getDiscountedPrice = (priceStr) => {
+  if (!priceStr) return "₹45";
+  const num = parseInt(priceStr.replace(/[^0-9]/g, ""), 10);
+  if (isNaN(num)) return "₹45";
+  return "₹" + Math.round(num * 0.6).toLocaleString(); // 40% off
 };
 
-const decos = [
-  { emoji: "🌈", style: { top: "3%",    left: "2%",   animationDelay: "0s"   } },
-  { emoji: "⚡", style: { top: "5%",    right: "3%",  animationDelay: "1s"   } },
-  { emoji: "🔮", style: { bottom: "5%", left: "5%",   animationDelay: "0.5s" } },
-  { emoji: "🌀", style: { bottom: "8%", right: "2%",  animationDelay: "1.5s" } },
-];
+const getStickerStyle = (badgeText) => {
+  const text = (badgeText || "").toUpperCase();
+  if (text.includes("CHILL")) {
+    return {
+      background: "rgba(168,212,0,0.15)",
+      color: "var(--lime)",
+      border: "1.5px solid var(--lime)",
+      boxShadow: "0 0 15px rgba(168,212,0,0.35)",
+    };
+  }
+  if (text.includes("SLEEP")) {
+    return {
+      background: "rgba(0,180,255,0.15)",
+      color: "var(--sky)",
+      border: "1.5px solid var(--sky)",
+      boxShadow: "0 0 15px rgba(0,180,255,0.35)",
+    };
+  }
+  return {
+    background: "rgba(204,47,160,0.15)",
+    color: "var(--pink)",
+    border: "1.5px solid var(--pink)",
+    boxShadow: "0 0 15px rgba(204,47,160,0.35)",
+  };
+};
+
+const getProductHoverGlow = (p) => {
+  const name = (p.name || "").toUpperCase();
+  if (name.includes("PLUTO") || name.includes("MUSHROOM")) {
+    return {
+      bgHover: "rgba(212,85,0,0.03)",
+      radialGlow: "radial-gradient(circle, rgba(212,85,0,0.08) 0%, transparent 70%)",
+      borderHover: "rgba(212,85,0,0.4)"
+    };
+  }
+  if (name.includes("SLEEP") || name.includes("NEPTUNE")) {
+    return {
+      bgHover: "rgba(0,180,255,0.03)",
+      radialGlow: "radial-gradient(circle, rgba(0,180,255,0.08) 0%, transparent 70%)",
+      borderHover: "rgba(0,180,255,0.4)"
+    };
+  }
+  return {
+    bgHover: "rgba(168,212,0,0.03)",
+    radialGlow: "radial-gradient(circle, rgba(168,212,0,0.08) 0%, transparent 70%)",
+    borderHover: "rgba(168,212,0,0.4)"
+  };
+};
 
 function ProductCard({ p }) {
   const { addToCart, toggleWishlist, wishlist } = useCart();
   const [hovered, setHovered] = useState(false);
-  const [added, setAdded]   = useState(false);
+  const [added, setAdded] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
 
+  const glow = getProductHoverGlow(p);
   const isWishlisted = wishlist.some(item => item.id === p.id);
 
   const handleAdd = (e) => {
@@ -33,113 +77,126 @@ function ProductCard({ p }) {
     setTimeout(() => setAdded(false), 1600);
   };
 
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart({ ...p, name: `${p.name} (Subscription)`, price: getDiscountedPrice(p.price) });
+    setSubscribing(true);
+    setTimeout(() => setSubscribing(false), 1600);
+  };
+
   return (
     <div
+      className="product-card"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: "var(--card-bg)",
-        border: `1px solid ${hovered ? p.hoverBorder || "var(--lime)" : "var(--border)"}`,
-        borderRadius: "20px", overflow: "hidden", cursor: "pointer",
-        transform: hovered ? `translate(-4px,-4px) rotate(-1deg)` : `rotate(${p.rotate || "0deg"})`,
-        transition: "transform 0.2s, border-color 0.2s",
-        position: "relative"
+        background: hovered ? glow.bgHover : "#050505",
+        borderColor: hovered ? glow.borderHover : "rgba(255,255,255,0.2)",
+        transition: "all 0.3s ease"
       }}
     >
+      {/* Wishlist Button */}
       <button 
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(p); }}
         style={{
-          position: "absolute", top: "12px", left: "12px", zIndex: 10,
-          background: "rgba(0,0,0,0.3)", border: "none", borderRadius: "50%",
-          width: "32px", height: "32px", display: "flex", alignItems: "center",
-          justifyContent: "center", cursor: "pointer", backdropFilter: "blur(4px)",
-          color: isWishlisted ? "var(--pink)" : "white"
+          position: "absolute", top: "16px", left: "16px", zIndex: 10,
+          background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "50%",
+          width: "36px", height: "36px", display: "flex", alignItems: "center",
+          justifyContent: "center", cursor: "pointer", backdropFilter: "blur(6px)",
+          color: isWishlisted ? "var(--pink)" : "white",
+          transition: "transform 0.2s",
         }}
+        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
+        onMouseLeave={e => e.currentTarget.style.transform = "none"}
       >
         {isWishlisted ? "❤️" : "🤍"}
       </button>
 
-      <Link href={`/product/${p.id}`} style={{ textDecoration: "none" }}>
-        {/* image area */}
-        <div style={{
-          height: "200px", background: p.bg || "var(--bg2)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          position: "relative", borderBottom: "1px solid var(--border)",
-        }}>
+      <Link href={`/product/${p.id}`} style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", height: "100%" }}>
+        {/* Top Compartment: Image Area (60% height) */}
+        <div 
+          className="product-card-graphic"
+          style={{
+            background: hovered ? glow.radialGlow : "rgba(255,255,255,0.005)",
+            transition: "background 0.3s ease"
+          }}
+        >
           {p.image ? (
-             <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+             <img src={p.image} alt={p.name} className="product-card-img" />
           ) : (
-            <span style={{ fontSize: "7rem", lineHeight: 1, animation: "bounce 2s ease-in-out infinite" }}>
+            <span style={{ fontSize: "6rem", lineHeight: 1, animation: "bounce 2s ease-in-out infinite" }}>
               {p.emoji || "📦"}
             </span>
           )}
+
+          {/* Glowing Circular Badge */}
           {p.badge && (
-            <span style={{
-              position: "absolute", top: "10px", right: "10px",
-              fontFamily: "var(--font-hand)", fontSize: "0.85rem", fontWeight: 700,
-              padding: "0.2rem 0.7rem", borderRadius: "999px",
-              transform: "rotate(4deg)",
-              ...badgeStyles[p.badge.type],
+            <div style={{
+              position: "absolute", top: "16px", right: "16px",
+              width: "56px", height: "56px", borderRadius: "50%",
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", fontWeight: 700,
+              textAlign: "center", lineHeight: "1.1", letterSpacing: "0.02em",
+              zIndex: 5,
+              ...getStickerStyle(p.badge.text)
             }}>
+              <span style={{ fontSize: "0.75rem", marginBottom: "2px" }}>
+                {p.badge.text.includes("CHILL") ? "🟢" : p.badge.text.includes("SLEEP") ? "🌙" : "✨"}
+              </span>
               {p.badge.text}
-            </span>
+            </div>
           )}
         </div>
 
-        {/* body */}
-        <div style={{ padding: "1.2rem" }}>
-          <div style={{ fontFamily: "var(--font-wack)", fontSize: "1.15rem", lineHeight: 1.2, marginBottom: "0.3rem", color: "var(--text)" }}>
-            {p.name}
-          </div>
-          <div style={{ fontFamily: "var(--font-fun)", fontSize: "0.82rem", color: "var(--muted)", marginBottom: "0.75rem" }}>
-            {p.type}
+        {/* Bottom Compartment: Text & CTA Buttons (40% height) */}
+        <div className="product-card-text">
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", width: "100%" }}>
+            {/* Title / Name */}
+            <h3 style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "0.85rem",
+              fontWeight: 700,
+              color: "#ffffff",
+              letterSpacing: "0.06em",
+              margin: 0,
+              lineHeight: "1.3",
+              textTransform: "uppercase"
+            }}>
+              {p.name}
+            </h3>
+
+            {/* Price section */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.25rem" }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.95rem", fontWeight: 700, color: "var(--lime)" }}>
+                {p.price}
+              </span>
+              {p.was && (
+                <span style={{ fontFamily: "sans-serif", fontSize: "0.8rem", color: "var(--muted)", textDecoration: "line-through" }}>
+                  {p.was}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
-            <span style={{ fontFamily: "var(--font-wack)", fontSize: "1.4rem", color: "var(--lime)" }}>{p.price}</span>
-            {p.was && (
-              <span style={{ fontFamily: "var(--font-fun)", fontSize: "0.85rem", color: "var(--muted)", textDecoration: "line-through" }}>{p.was}</span>
-            )}
-            {p.saved && (
-              <span style={{
-                background: "rgba(168,212,0,0.08)", color: "var(--lime)",
-                fontFamily: "var(--font-hand)", fontSize: "0.75rem", fontWeight: 700,
-                padding: "0.1rem 0.5rem", borderRadius: "999px",
-                border: "1px solid rgba(168,212,0,0.25)",
-              }}>{p.saved}</span>
-            )}
-          </div>
+          {/* Stacking CTA Buttons */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%", marginTop: "1rem" }}>
+            {/* Button 1: Subscribe & Save */}
+            <button
+              onClick={handleSubscribe}
+              className="sub-btn"
+            >
+              {subscribing ? "✓ SUBSCRIBED! 🛸" : `Subscribe & Save 40%  ${getDiscountedPrice(p.price)}`}
+            </button>
 
-          <button
-            onClick={handleAdd}
-            style={{
-              width: "100%",
-              background: added ? "var(--green)" : "rgba(255,255,255,0.04)",
-              color: added ? "#000" : "var(--text)",
-              border: `1px solid ${added ? "var(--green)" : "var(--border)"}`,
-              borderRadius: "999px", padding: "0.65rem",
-              fontFamily: "var(--font-wack)", fontSize: "1rem", cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={e => {
-              if (!added) {
-                e.currentTarget.style.background = "var(--lime)";
-                e.currentTarget.style.borderColor = "var(--lime)";
-                e.currentTarget.style.color = "#000";
-                e.currentTarget.style.transform = "scale(1.03)";
-              }
-            }}
-            onMouseLeave={e => {
-              if (!added) {
-                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                e.currentTarget.style.borderColor = "var(--border)";
-                e.currentTarget.style.color = "var(--text)";
-                e.currentTarget.style.transform = "none";
-              }
-            }}
-          >
-            {added ? "✓ slay! added 💅" : "+ add to cart 🛒"}
-          </button>
+            {/* Button 2: Add to Cart */}
+            <button
+              onClick={handleAdd}
+              className="cart-btn"
+            >
+              {added ? "✓ ADDED! 🛒" : `Add to Cart  ${p.price}`}
+            </button>
+          </div>
         </div>
       </Link>
     </div>
@@ -169,7 +226,7 @@ export default function Products() {
 
   return (
     <section id="products" style={{
-      padding: "5rem 2rem", position: "relative", zIndex: 1, background: "var(--bg)", 
+      padding: "6rem 0", position: "relative", zIndex: 1, background: "#000", 
     }}>
       {/* dot grid */}
       <div style={{
@@ -178,31 +235,183 @@ export default function Products() {
         backgroundSize: "28px 28px",
       }} />
 
-      {/* floating decos */}
-      {decos.map((d, i) => (
-        <div key={i} style={{
-          position: "absolute", pointerEvents: "none", userSelect: "none",
-          fontSize: "2rem", opacity: 0.3,
-          animation: "floatDeco 5s ease-in-out infinite",
-          ...d.style,
+      <style>{`
+        .products-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          width: 100%;
+          border-top: 1px solid rgba(255,255,255,0.2);
+          border-bottom: 1px solid rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.01);
+          overflow: hidden;
+          gap: 0;
+        }
+
+        .product-card {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          height: 560px;
+          border-right: 1px solid rgba(255,255,255,0.2);
+          transition: background 0.3s ease, border-color 0.3s ease;
+          overflow: hidden;
+          background: #050505;
+        }
+
+        .product-card:hover {
+          background: rgba(255,255,255,0.01);
+        }
+
+        .product-card-graphic {
+          height: 60%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-bottom: 1px solid rgba(255,255,255,0.2);
+          padding: 2rem;
+          position: relative;
+          background: rgba(255,255,255,0.005);
+        }
+
+        .product-card-img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+          transition: transform 0.4s ease;
+        }
+
+        .product-card:hover .product-card-img {
+          transform: scale(1.05);
+        }
+
+        .product-card-text {
+          height: 40%;
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+
+        .sub-btn {
+          width: 100%;
+          background: var(--lime);
+          color: #000;
+          border: none;
+          border-radius: 4px;
+          padding: 0.65rem;
+          font-family: 'Space Mono', monospace;
+          font-size: 0.78rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: transform 0.2s, background 0.2s;
+          text-align: center;
+        }
+
+        .sub-btn:hover {
+          transform: scale(1.02);
+          background: #bbf000;
+        }
+
+        .cart-btn {
+          width: 100%;
+          background: rgba(255,255,255,0.03);
+          color: var(--text);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 4px;
+          padding: 0.65rem;
+          font-family: 'Space Mono', monospace;
+          font-size: 0.78rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.2s;
+          text-align: center;
+        }
+
+        .cart-btn:hover {
+          background: rgba(255,255,255,0.08);
+          transform: scale(1.02);
+        }
+
+        /* Responsive Breakpoints */
+
+        /* Desktop columns 4n right border strip */
+        @media (min-width: 1200px) {
+          .product-card:nth-child(4n) {
+            border-right: none;
+          }
+        }
+
+        /* Laptops & Tablets */
+        @media (max-width: 1199px) and (min-width: 768px) {
+          .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .product-card {
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+          }
+          .product-card:nth-child(2n) {
+            border-right: none;
+          }
+        }
+
+        /* Mobile phones */
+        @media (max-width: 767px) {
+          .products-grid {
+            grid-template-columns: 1fr;
+          }
+          .product-card {
+            border-right: none;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            height: 530px;
+          }
+          .product-card:last-child {
+            border-bottom: none;
+          }
+          .product-card-graphic {
+            height: 55%;
+          }
+          .product-card-text {
+            height: 45%;
+          }
+        }
+      `}</style>
+
+      {/* Modern left-aligned geometric header block */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", textAlign: "left", marginBottom: "3rem", maxWidth: "1440px", margin: "0 auto 3.5rem", padding: "0 2rem" }}>
+        <h2 style={{
+          fontFamily: "'Space Mono', monospace",
+          fontSize: "clamp(1.4rem, 3.2vw, 2.0rem)",
+          fontWeight: 700,
+          color: "#ffffff",
+          letterSpacing: "0.08em",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.8rem",
+          margin: 0,
         }}>
-          {d.emoji}
-        </div>
-      ))}
+          <span style={{ display: "inline-block", width: "1rem", height: "1rem", background: "var(--lime)" }} />
+          OUR BESTSELLERS
+        </h2>
+        <p style={{
+          fontFamily: "sans-serif",
+          fontSize: "clamp(0.8rem, 1.6vw, 0.95rem)",
+          color: "rgba(255,255,255,0.65)",
+          lineHeight: "1.6",
+          margin: 0,
+          maxWidth: "800px",
+        }}>
+          Explore our most wanted streetwear capsules, designed with premium tie-dye techniques and signature cosmic vibrations.
+        </p>
+      </div>
 
-      <SectionHeader tag="✦ top picks ✦" tagColor="var(--sky)" title="the" highlight="drip" suffix="hits 🔥" />
-
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))",
-        gap: "1.5rem", maxWidth: "1440px", margin: "0 auto",
-      }}>
+      <div className="products-grid">
         {loading ? (
           <div style={{
             gridColumn: "1 / -1", textAlign: "center", padding: "4rem",
-            background: "rgba(255,255,255,0.02)", borderRadius: "20px",
-            border: "1px dashed var(--border)", color: "var(--muted)",
-            fontFamily: "var(--font-hand)", fontSize: "1.5rem"
+            background: "rgba(255,255,255,0.02)", borderRadius: "0px",
+            border: "none", color: "var(--muted)",
+            fontFamily: "sans-serif", fontSize: "1.1rem"
           }}>
             fetching the latest drip... 🛸
           </div>
@@ -211,36 +420,30 @@ export default function Products() {
         ) : (
           <div style={{
             gridColumn: "1 / -1", textAlign: "center", padding: "4rem",
-            background: "rgba(255,255,255,0.02)", borderRadius: "20px",
-            border: "1px dashed var(--border)", color: "var(--muted)",
-            fontFamily: "var(--font-hand)", fontSize: "1.5rem"
+            background: "rgba(255,255,255,0.02)", borderRadius: "0px",
+            border: "none", color: "var(--muted)",
+            fontFamily: "sans-serif", fontSize: "1.1rem"
           }}>
             no drops found right now... 👽
           </div>
         )}
 
         {/* hype card */}
-        <div style={{
-          background: "rgba(138,94,204,0.05)", borderRadius: "20px",
-          border: "1px solid rgba(138,94,204,0.2)",
-          display: "flex", flexDirection: "column", alignItems: "center",
-          justifyContent: "center", padding: "2rem", textAlign: "center",
-          gap: "1rem", minHeight: "300px",
-        }}>
-          <div style={{ fontSize: "3rem", animation: "bounce 1.5s infinite" }}>🚀</div>
-          <div style={{ fontFamily: "var(--font-wack)", fontSize: "1.5rem", color: "var(--lime)" }}>
-            MORE DROPS<br />INCOMING
+        <div className="product-card">
+          <div className="product-card-graphic">
+            <span style={{ fontSize: "6rem", animation: "bounce 1.5s infinite" }}>🚀</span>
           </div>
-          <div style={{ fontFamily: "var(--font-hand)", color: "var(--muted)", fontSize: "1rem" }}>
-            stay tuned bestie
+          <div className="product-card-text" style={{ justifyContent: "center", alignItems: "center", gap: "0.8rem", height: "40%" }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "1.2rem", fontWeight: 700, color: "var(--lime)", textAlign: "center" }}>
+              MORE DROPS<br />INCOMING
+            </div>
+            <div style={{ fontFamily: "sans-serif", color: "var(--muted)", fontSize: "0.82rem", textAlign: "center" }}>
+              stay tuned bestie
+            </div>
+            <button className="sub-btn" style={{ width: "90%" }}>
+              notify me 🔔
+            </button>
           </div>
-          <button style={{
-            background: "var(--lime)", color: "#000", borderRadius: "999px",
-            padding: "0.5rem 1.5rem", fontFamily: "var(--font-wack)",
-            fontSize: "0.85rem", cursor: "pointer", border: "none",
-          }}>
-            notify me 🔔
-          </button>
         </div>
       </div>
     </section>

@@ -68,8 +68,8 @@ function FaqItem({ q, a }) {
       }}>
         <div style={{
           padding: "0.8rem 1.3rem 1.2rem",
-          fontFamily: "var(--font-fun)", fontSize: "0.95rem",
-          lineHeight: 1.7, color: "var(--muted)",
+          fontFamily: "sans-serif", fontSize: "0.9rem",
+          lineHeight: 1.7, color: "rgba(255,255,255,0.65)",
           borderTop: "1px dashed rgba(255,255,255,0.06)",
         }}>
           {a}
@@ -85,7 +85,32 @@ export default function FAQ() {
       padding: "5rem 2rem", background: "#030303",
       position: "relative", zIndex: 1,
     }}>
-      <SectionHeader tag="❓ got Qs?" tagColor="var(--purple)" title="we got" highlight="answers" suffix="💬" />
+      {/* Modern left-aligned geometric header block */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", textAlign: "left", marginBottom: "3rem", maxWidth: "760px", margin: "0 auto 3rem" }}>
+        <h2 style={{
+          fontFamily: "'Space Mono', monospace",
+          fontSize: "clamp(1.4rem, 3.2vw, 2.0rem)",
+          fontWeight: 700,
+          color: "#ffffff",
+          letterSpacing: "0.08em",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.8rem",
+          margin: 0,
+        }}>
+          <span style={{ display: "inline-block", width: "1rem", height: "1rem", background: "var(--lime)" }} />
+          FREQUENTLY ASKED QUESTIONS
+        </h2>
+        <p style={{
+          fontFamily: "sans-serif",
+          fontSize: "clamp(0.8rem, 1.6vw, 0.95rem)",
+          color: "rgba(255,255,255,0.65)",
+          lineHeight: "1.6",
+          margin: 0,
+        }}>
+          All the answers to your existential queries regarding fabrics, cosmic fits, and interstellar shipping.
+        </p>
+      </div>
       <div style={{ maxWidth: "760px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "1rem" }}>
         {faqs.map((f, i) => <FaqItem key={i} q={f.q} a={f.a} />)}
       </div>

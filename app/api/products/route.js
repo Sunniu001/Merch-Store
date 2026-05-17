@@ -10,23 +10,23 @@ export async function GET() {
   }
 
   try {
-    // WooCommerce REST API endpoint for products
-    const url = `${storeUrl}/wp-json/wc/v3/products?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}`;
+    const url = `${storeUrl}/wp-json/wc/v3/products?consumer_key=${consumerKey}&consumer_secret=${consumerSecret}&per_page=20`;
+    console.log(`Fetching products from: ${url}`);
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store', // Ensure we get fresh data
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      return NextResponse.json({ error: 'WooCommerce API error', details: errorData }, { status: response.status });
+      const errorText = await response.text();
+      console.error(`WooCommerce API Error: ${response.status} - ${errorText}`);
+      return NextResponse.json({ error: 'WooCommerce API error', status: response.status, details: errorText }, { status: response.status });
     }
 
     const products = await response.json();
+    console.log(`Successfully fetched ${products.length} products`);
     
     // Map WooCommerce product data to the format used in the UI
     const mappedProducts = products.map(p => {

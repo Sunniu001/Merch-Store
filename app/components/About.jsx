@@ -152,43 +152,30 @@ export default function About() {
 
         {/* Right — text */}
         <div className="about-text">
-          <div
-            style={{
-              display: "inline-block",
-              background: "rgba(0,184,204,0.08)",
-              color: "var(--sky)",
-              border: "1px solid rgba(0,184,204,0.3)",
-              borderRadius: "999px",
-              fontFamily: "var(--font-hand)",
-              fontSize: "clamp(0.9rem, 2vw, 1.1rem)",
-              padding: "0.2rem 1.2rem",
-              marginBottom: "1rem",
-              transform: "rotate(2deg)",
-            }}
-          >
-            ✦ our lore ✦
+          {/* Modern left-aligned geometric header block */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", textAlign: "left", marginBottom: "1.8rem" }}>
+            <h2 style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "clamp(1.4rem, 3.2vw, 2.0rem)",
+              fontWeight: 700,
+              color: "#ffffff",
+              letterSpacing: "0.08em",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.8rem",
+              margin: 0,
+            }}>
+              <span style={{ display: "inline-block", width: "1rem", height: "1rem", background: "var(--lime)" }} />
+              OUR COGNITIVE EXPERIMENT
+            </h2>
           </div>
-
-          <h2
-            style={{
-              fontFamily: "var(--font-wack)",
-              fontSize: "clamp(1.8rem, 5vw, 3.5rem)",
-              lineHeight: 1.05,
-              marginBottom: "1.2rem",
-              color: "var(--text)",
-            }}
-          >
-            from the cosmos,
-            <br />
-            <span style={{ color: "var(--purple)" }}>for the streets</span> 👽
-          </h2>
 
           <p
             style={{
-              fontFamily: "var(--font-fun)",
-              fontSize: "clamp(0.95rem, 2vw, 1.05rem)",
+              fontFamily: "sans-serif",
+              fontSize: "clamp(0.9rem, 2vw, 0.95rem)",
               lineHeight: 1.7,
-              color: "var(--muted)",
+              color: "rgba(255,255,255,0.7)",
               marginBottom: "1rem",
             }}
           >
@@ -198,10 +185,10 @@ export default function About() {
           </p>
           <p
             style={{
-              fontFamily: "var(--font-fun)",
-              fontSize: "clamp(0.95rem, 2vw, 1.05rem)",
+              fontFamily: "sans-serif",
+              fontSize: "clamp(0.9rem, 2vw, 0.95rem)",
               lineHeight: 1.7,
-              color: "var(--muted)",
+              color: "rgba(255,255,255,0.7)",
               marginBottom: "1rem",
             }}
           >
@@ -217,11 +204,10 @@ export default function About() {
               background: "rgba(212,85,0,0.08)",
               color: "var(--orange)",
               border: "1px solid rgba(212,85,0,0.3)",
-              borderRadius: "999px",
+              borderRadius: "4px",
               padding: "0.4rem 1.2rem",
-              fontFamily: "var(--font-wack)",
-              fontSize: "clamp(0.85rem, 2vw, 1rem)",
-              transform: "rotate(-1deg)",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "clamp(0.8rem, 2vw, 0.9rem)",
               marginTop: "0.5rem",
             }}
           >

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 const stars = [
   { top: "18%", left: "8%", delay: "0s" },
   { top: "30%", left: "22%", delay: "0.5s" },
@@ -17,22 +19,78 @@ const sparkles = [
 ];
 
 export default function Hero() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const heroImages = [
+    "/Hero1.jpg",
+    "/Hero2.jpg",
+    "/Hero3.jpg",
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
   const scrollTo = (id) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
+  useEffect(() => {
+    const sky = document.getElementById("parallax-sky");
+    const giantText = document.getElementById("parallax-giant-text");
+    const alienCol = document.getElementById("parallax-alien-col");
+    const wave = document.getElementById("parallax-wave");
+
+    let active = true;
+
+    const handleScroll = () => {
+      if (!active) return;
+      const scrolled = window.scrollY;
+
+      // On screens larger than tablet, apply GPU-accelerated parallax offsets
+      if (window.innerWidth > 768) {
+        window.requestAnimationFrame(() => {
+          if (sky) sky.style.transform = `translate3d(0, ${scrolled * 0.15}px, 0)`;
+          if (giantText) giantText.style.transform = `translate3d(0, ${scrolled * 0.45}px, 0)`;
+          if (alienCol) alienCol.style.transform = `translate3d(0, ${scrolled * 0.28}px, 0)`;
+          if (wave) wave.style.transform = `translate3d(0, ${scrolled * -0.12}px, 0)`;
+        });
+      } else {
+        // Reset transforms on mobile screens to ensure perfect layout integrity
+        window.requestAnimationFrame(() => {
+          if (sky) sky.style.transform = "none";
+          if (giantText) giantText.style.transform = "none";
+          if (alienCol) alienCol.style.transform = "none";
+          if (wave) wave.style.transform = "none";
+        });
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Trigger initial alignment check
+    handleScroll();
+
+    return () => {
+      active = false;
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <section
       id="home"
       style={{
         minHeight: "100vh",
-        padding: "130px 2rem 4rem",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-end",
         justifyContent: "center",
         position: "relative",
         overflow: "hidden",
         zIndex: 1,
         background: "black",
+        padding: "220px 2rem 60px", // increased top space, snug bottom space for wave
       }}
     >
       {/* Responsive styles */}
@@ -64,13 +122,13 @@ export default function Hero() {
 
         .hero-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 1.1fr 0.9fr;
           gap: 3rem;
-          align-items: center;
+          align-items: end;
           max-width: 1440px;
           width: 100%;
           position: relative;
-          z-index: 2;
+          z-index: 20;
         }
 
         .hero-alien-side {
@@ -80,11 +138,11 @@ export default function Hero() {
           position: relative;
         }
 
-        .hero-alien-svg {
-          animation: floatAlien 3s ease-in-out infinite;
-          filter: drop-shadow(4px 6px 0 rgba(0,0,0,0.7));
-          width: 320px;
-          height: 360px;
+        .hero-slider-card {
+          animation: floatAlien 3.8s ease-in-out infinite;
+          width: 100%;
+          max-width: 520px;
+          aspect-ratio: 16 / 10;
         }
 
         .hero-btns {
@@ -107,20 +165,20 @@ export default function Hero() {
         .hero-btn:hover { transform: translate(-2px, -3px) scale(1.03); }
         .hero-btn:active { transform: translate(1px, 1px); }
 
-        /* Tablet (641px – 1023px): side-by-side but smaller alien */
+        /* Tablet (641px – 1023px): side-by-side but smaller slider */
         @media (max-width: 1023px) {
           .hero-grid { gap: 2rem; }
-          .hero-alien-svg { width: 240px; height: 270px; }
+          .hero-slider-card { max-width: 440px; }
         }
 
-        /* Mobile (≤640px): stack vertically, alien goes below text */
+        /* Mobile (≤640px): stack vertically, slider goes below text */
         @media (max-width: 640px) {
           .hero-grid {
             grid-template-columns: 1fr !important;
             gap: 2.5rem;
             text-align: center;
           }
-          .hero-alien-svg { width: 200px; height: 225px; }
+          .hero-slider-card { max-width: 460px; margin: 0 auto; }
           .hero-btns {
             justify-content: center;
           }
@@ -140,505 +198,251 @@ export default function Hero() {
         }
       `}</style>
 
-      {/* Blobs */}
+      {/* Cinematic Full-Screen Background Auto-Slider (Speed: 0.15) */}
       <div
+        id="parallax-sky"
         style={{
           position: "absolute",
-          width: "560px",
-          height: "560px",
-          background:
-            "radial-gradient(circle, rgba(138,94,204,0.1) 0%, transparent 70%)",
-          top: "0%",
-          left: "-12%",
+          inset: 0,
+          zIndex: 1,
           pointerEvents: "none",
-          animation: "morph1 8s ease-in-out infinite",
+          overflow: "hidden",
+          willChange: "transform",
         }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          width: "440px",
-          height: "440px",
-          background:
-            "radial-gradient(circle, rgba(0,184,204,0.08) 0%, transparent 70%)",
-          bottom: "0%",
-          right: "-10%",
-          pointerEvents: "none",
-          animation: "morph2 10s ease-in-out infinite",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          width: "320px",
-          height: "320px",
-          background:
-            "radial-gradient(circle, rgba(212,85,0,0.07) 0%, transparent 70%)",
-          top: "30%",
-          right: "8%",
-          pointerEvents: "none",
-          animation: "morph1 12s 2s ease-in-out infinite",
-        }}
-      />
-
-      {/* Stars */}
-      {stars.map((s, i) => (
-        <div
-          key={i}
-          style={{
-            position: "absolute",
-            pointerEvents: "none",
-            zIndex: 1,
-            ...s,
-          }}
-        >
-          <span
-            style={{
-              fontSize: "1.1rem",
-              color: "var(--yellow)",
-              animation: `twinkle 2s ${s.delay} ease-in-out infinite`,
-            }}
-          >
-            ★
-          </span>
-        </div>
-      ))}
-
-      {/* Inner grid */}
-      <div className="hero-grid">
-        {/* Text side */}
-        <div style={{ animation: "fadeUp 0.5s ease both" }}>
-          <div
-            className="hero-badge"
-            style={{
-              display: "inline-block",
-              background: "rgba(212,85,0,0.1)",
-              color: "var(--orange)",
-              border: "1px solid rgba(212,85,0,0.4)",
-              borderRadius: "999px",
-              fontFamily: "var(--font-hand)",
-              fontSize: "clamp(0.9rem, 2.5vw, 1.2rem)",
-              padding: "0.2rem 1rem",
-              marginBottom: "1rem",
-              transform: "rotate(-3deg)",
-            }}
-          >
-            ✌️ extraterrestrial drip
-          </div>
-
-          <h1
-            style={{
-              fontFamily: "var(--font-wack)",
-              fontSize: "clamp(2.8rem, 8vw, 6.5rem)",
-              lineHeight: 0.95,
-              letterSpacing: "-0.02em",
-              color: "var(--text)",
-              animation: "fadeUp 0.5s 0.1s ease both",
-              margin: 0,
-            }}
-          >
-            HIPPIE
-            <br />
-            <span style={{ color: "var(--purple)", display: "block" }}>
-              ALIENS
-            </span>
-            <span
+      >
+        {heroImages.map((src, index) => {
+          const isActive = index === currentSlide;
+          return (
+            <div
+              key={index}
               style={{
-                color: "var(--lime)",
-                background: "rgba(168,212,0,0.08)",
-                border: "1px solid rgba(168,212,0,0.3)",
-                display: "inline-block",
-                padding: "0 0.3em",
-                borderRadius: "8px",
-                transform: "rotate(1deg)",
+                position: "absolute",
+                inset: 0,
+                opacity: isActive ? 1 : 0,
+                transform: isActive ? "scale(1.025)" : "scale(0.975)",
+                transition: "opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1), transform 1.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                zIndex: isActive ? 3 : 1,
               }}
             >
-              COLLECTIVE
+              <img
+                src={src}
+                alt={`Hippie Alien Background Slide ${index + 1}`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+          );
+        })}
+
+        {/* Dynamic radial gradient vignette overlay to guarantee high-fashion text readability on the left */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "radial-gradient(circle at 25% 50%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 100%), linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 20%, transparent 80%, rgba(5,5,5,0.95) 100%)",
+            zIndex: 4,
+          }}
+        />
+      </div>
+
+
+
+      {/* Layer 3: Main Layout & Interactions (Standard Scroll Speed) */}
+      <div className="hero-grid">
+        {/* Text column */}
+        <div style={{ animation: "fadeUp 0.5s ease both", position: "relative", zIndex: 25 }}>
+          {/* Main Headline Group */}
+          <h1
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              margin: 0,
+              padding: 0,
+            }}
+          >
+            {/* WEAR THE */}
+            <span
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: "clamp(2.6rem, 5.5vw, 4.4rem)",
+                fontWeight: 900,
+                color: "#ffffff",
+                lineHeight: "0.85",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+              }}
+            >
+              WEAR THE
+            </span>
+
+            {/* FREQUENCY */}
+            <span
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: "clamp(3.6rem, 7.8vw, 6.2rem)",
+                color: "#ffffff",
+                lineHeight: "0.85",
+                letterSpacing: "0.03em",
+                textTransform: "uppercase",
+                display: "block",
+              }}
+            >
+              FREQUENCY
             </span>
           </h1>
 
-          <p
+          {/* Scalable Organic SVG Green Paint Brush Stroke */}
+          <div style={{ width: "100%", maxWidth: "340px", margin: "0.5rem 0" }}>
+            <svg
+              viewBox="0 0 100 8"
+              preserveAspectRatio="none"
+              style={{ width: "100%", height: "8px", color: "var(--lime)", display: "block" }}
+            >
+              <path
+                d="M 0,4 Q 15,1 35,5 Q 55,7 75,3 Q 90,2 100,4 Q 85,6 60,4 Q 30,5 0,4"
+                fill="currentColor"
+              />
+            </svg>
+          </div>
+
+          {/* POSITIVE VIBES ONLY with Peace Sign */}
+          <div
             style={{
-              fontFamily: "var(--font-hand)",
-              fontSize: "clamp(1rem, 2.5vw, 1.4rem)",
-              color: "var(--muted)",
-              margin: "1.2rem 0 2rem",
-              animation: "fadeUp 0.5s 0.2s ease both",
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: "clamp(1.3rem, 2.8vw, 2.1rem)",
+              color: "var(--pink)",
+              fontStyle: "italic",
+              textTransform: "uppercase",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              margin: "0 0 1.2rem",
+              transform: "rotate(-1.5deg)",
+              width: "fit-content",
+              textShadow: "0 0 10px rgba(204, 47, 160, 0.45)",
+              letterSpacing: "0.02em",
             }}
           >
-            cosmic threads for the chronically unserious 🌌
-          </p>
+            POSITIVE VIBES ONLY
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ display: "inline-block", verticalAlign: "middle" }}
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="2" x2="12" y2="22" />
+              <line x1="12" y1="12" x2="4.9" y2="19.1" />
+              <line x1="12" y1="12" x2="19.1" y2="19.1" />
+            </svg>
+          </div>
 
-          <div className="hero-btns">
+          {/* Monospace details text */}
+          <div
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "clamp(0.85rem, 1.7vw, 1.05rem)",
+              lineHeight: "1.5",
+              letterSpacing: "0.15em",
+              margin: "0 0 1.8rem 0",
+              fontWeight: 700,
+            }}
+          >
+            <div style={{ color: "#ffffff" }}>APPAREL. ART. ATTITUDE.</div>
+            <div style={{ color: "var(--lime)" }}>FOR THE HIGHER VIBRATIONS.</div>
+          </div>
+
+          {/* Action buttons matching the screenshot exactly */}
+          <div className="hero-btns" style={{ display: "flex", gap: "1rem" }}>
             <button
               className="hero-btn"
               onClick={() => scrollTo("products")}
-              style={{ background: "#a8d400", color: "#000" }}
+              style={{
+                background: "rgba(0,0,0,0.6)",
+                color: "var(--lime)",
+                border: "2px solid var(--lime)",
+                borderRadius: "12px",
+                padding: "0.7rem 1.8rem",
+                fontFamily: "var(--font-fun)",
+                fontSize: "1.1rem",
+                letterSpacing: "0.06em",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.7rem",
+                boxShadow: "0 0 15px rgba(168,212,0,0.2)",
+                transition: "all 0.2s ease-in-out",
+                textTransform: "uppercase",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--lime)";
+                e.currentTarget.style.color = "#000000";
+                e.currentTarget.style.boxShadow = "0 0 25px rgba(168,212,0,0.6)";
+                e.currentTarget.style.transform = "scale(1.03) translate(-2px, -3px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(0,0,0,0.6)";
+                e.currentTarget.style.color = "var(--lime)";
+                e.currentTarget.style.boxShadow = "0 0 15px rgba(168,212,0,0.2)";
+                e.currentTarget.style.transform = "none";
+              }}
             >
-              shop the drip 🛍️
-            </button>
-            <button
-              className="hero-btn"
-              onClick={() => scrollTo("about")}
-              style={{ background: "#cc2fa0", color: "#fff" }}
-            >
-              our lore 👁️
+              SHOP NEW DROP
+              <span style={{ fontSize: "1.4rem", fontWeight: "bold" }}>→</span>
             </button>
           </div>
         </div>
 
-        {/* Alien side */}
-        <div
-          className="hero-alien-side"
-          style={{ animation: "fadeUp 0.5s 0.2s ease both" }}
-        >
-          {sparkles.map((s, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                fontSize: "1.5rem",
-                animation: `sparklePop 2s ${s.delay} ease-in-out infinite`,
-                ...s,
-              }}
-            >
-              {s.emoji}
-            </div>
-          ))}
+        {/* Empty spacer column to perfectly display the product graphics on the right side of the background images */}
+        <div style={{ pointerEvents: "none" }} />
+      </div>
 
-          <svg
-            className="hero-alien-svg"
-            viewBox="0 0 320 360"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <ellipse
-              cx="160"
-              cy="240"
-              rx="75"
-              ry="100"
-              fill="#a8d400"
-              stroke="#000"
-              strokeWidth="3"
+      {/* Glowing Navigation Capsule Dots floating elegantly at the absolute bottom of the viewport */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "30px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "12px",
+          zIndex: 40,
+          background: "rgba(0,0,0,0.6)",
+          padding: "8px 18px",
+          borderRadius: "999px",
+          backdropFilter: "blur(8px)",
+          border: "1px solid rgba(255,255,255,0.15)",
+          boxShadow: "0 4px 25px rgba(0,0,0,0.6)",
+        }}
+      >
+        {heroImages.map((_, index) => {
+          const isActive = index === currentSlide;
+          return (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              style={{
+                width: isActive ? "26px" : "12px",
+                height: "12px",
+                borderRadius: "999px",
+                background: isActive ? "var(--lime)" : "rgba(255,255,255,0.4)",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                boxShadow: isActive ? "0 0 12px var(--lime)" : "none",
+              }}
+              aria-label={`Go to slide ${index + 1}`}
             />
-            <ellipse
-              cx="160"
-              cy="255"
-              rx="40"
-              ry="50"
-              fill="#6a3eb5"
-              opacity="0.2"
-            />
-            <text
-              x="160"
-              y="248"
-              textAnchor="middle"
-              fontSize="18"
-              fill="#000"
-              fontFamily="'Fredoka One',sans-serif"
-            >
-              PEACE
-            </text>
-            <text
-              x="160"
-              y="268"
-              textAnchor="middle"
-              fontSize="12"
-              fill="#000"
-              fontFamily="'Fredoka One',sans-serif"
-            >
-              ✌️
-            </text>
-            <ellipse
-              cx="160"
-              cy="140"
-              rx="100"
-              ry="85"
-              fill="#a8d400"
-              stroke="#000"
-              strokeWidth="3"
-            />
-            <line
-              x1="105"
-              y1="65"
-              x2="80"
-              y2="25"
-              stroke="#000"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <circle
-              cx="79"
-              cy="22"
-              r="9"
-              fill="#cc2fa0"
-              stroke="#000"
-              strokeWidth="2"
-            />
-            <circle cx="79" cy="22" r="4" fill="white" />
-            <line
-              x1="215"
-              y1="65"
-              x2="240"
-              y2="25"
-              stroke="#000"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <circle
-              cx="241"
-              cy="22"
-              r="9"
-              fill="#00b8cc"
-              stroke="#000"
-              strokeWidth="2"
-            />
-            <circle cx="241" cy="22" r="4" fill="white" />
-            <ellipse
-              cx="125"
-              cy="140"
-              rx="28"
-              ry="34"
-              fill="white"
-              stroke="#000"
-              strokeWidth="2.5"
-            />
-            <ellipse cx="125" cy="142" rx="18" ry="22" fill="#8a5ecc" />
-            <ellipse cx="125" cy="142" rx="10" ry="14" fill="#000" />
-            <ellipse
-              cx="120"
-              cy="136"
-              rx="4"
-              ry="5"
-              fill="white"
-              opacity="0.9"
-            />
-            <ellipse
-              cx="197"
-              cy="138"
-              rx="30"
-              ry="37"
-              fill="white"
-              stroke="#000"
-              strokeWidth="2.5"
-            />
-            <ellipse cx="200" cy="141" rx="20" ry="25" fill="#cc2fa0" />
-            <ellipse cx="200" cy="141" rx="12" ry="16" fill="#000" />
-            <ellipse
-              cx="194"
-              cy="134"
-              rx="5"
-              ry="6"
-              fill="white"
-              opacity="0.9"
-            />
-            <text
-              x="119"
-              y="147"
-              textAnchor="middle"
-              fontSize="10"
-              fill="#cc2fa0"
-            >
-              ♥
-            </text>
-            <text
-              x="194"
-              y="145"
-              textAnchor="middle"
-              fontSize="12"
-              fill="#00b8cc"
-            >
-              ♥
-            </text>
-            <ellipse
-              cx="162"
-              cy="165"
-              rx="5"
-              ry="3.5"
-              fill="#000"
-              opacity="0.3"
-            />
-            <path
-              d="M130 182 Q162 210 194 182"
-              stroke="#000"
-              strokeWidth="3.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-            <path
-              d="M136 185 Q162 207 188 185 L188 195 Q162 215 136 195 Z"
-              fill="white"
-              stroke="#000"
-              strokeWidth="1.5"
-            />
-            <line
-              x1="155"
-              y1="188"
-              x2="153"
-              y2="200"
-              stroke="#000"
-              strokeWidth="1.5"
-            />
-            <line
-              x1="169"
-              y1="188"
-              x2="171"
-              y2="200"
-              stroke="#000"
-              strokeWidth="1.5"
-            />
-            <ellipse
-              cx="100"
-              cy="170"
-              rx="15"
-              ry="10"
-              fill="#cc2fa0"
-              opacity="0.25"
-            />
-            <ellipse
-              cx="222"
-              cy="170"
-              rx="15"
-              ry="10"
-              fill="#cc2fa0"
-              opacity="0.25"
-            />
-            <path
-              d="M88 215 Q50 195 40 165"
-              stroke="#a8d400"
-              strokeWidth="22"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <path
-              d="M88 215 Q50 195 40 165"
-              stroke="#000"
-              strokeWidth="3"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <circle
-              cx="40"
-              cy="162"
-              r="18"
-              fill="#a8d400"
-              stroke="#000"
-              strokeWidth="2.5"
-            />
-            <line
-              x1="40"
-              y1="150"
-              x2="40"
-              y2="175"
-              stroke="#000"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1="40"
-              y1="162"
-              x2="27"
-              y2="155"
-              stroke="#000"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1="40"
-              y1="162"
-              x2="53"
-              y2="155"
-              stroke="#000"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <path
-              d="M232 215 Q268 195 278 170"
-              stroke="#a8d400"
-              strokeWidth="22"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <path
-              d="M232 215 Q268 195 278 170"
-              stroke="#000"
-              strokeWidth="3"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <rect
-              x="262"
-              y="130"
-              width="52"
-              height="36"
-              rx="6"
-              fill="#ccb800"
-              stroke="#000"
-              strokeWidth="2"
-            />
-            <text
-              x="288"
-              y="146"
-              textAnchor="middle"
-              fontSize="9"
-              fill="#000"
-              fontFamily="'Fredoka One',sans-serif"
-            >
-              GOOD
-            </text>
-            <text
-              x="288"
-              y="158"
-              textAnchor="middle"
-              fontSize="9"
-              fill="#000"
-              fontFamily="'Fredoka One',sans-serif"
-            >
-              VIBES
-            </text>
-            <ellipse
-              cx="138"
-              cy="338"
-              rx="22"
-              ry="18"
-              fill="#a8d400"
-              stroke="#000"
-              strokeWidth="3"
-            />
-            <ellipse
-              cx="182"
-              cy="338"
-              rx="22"
-              ry="18"
-              fill="#a8d400"
-              stroke="#000"
-              strokeWidth="3"
-            />
-            <ellipse
-              cx="138"
-              cy="346"
-              rx="26"
-              ry="10"
-              fill="#8a5ecc"
-              stroke="#000"
-              strokeWidth="2"
-            />
-            <ellipse
-              cx="182"
-              cy="346"
-              rx="26"
-              ry="10"
-              fill="#cc2fa0"
-              stroke="#000"
-              strokeWidth="2"
-            />
-            <text x="148" y="295" fontSize="10" fill="#000" opacity="0.3">
-              ★
-            </text>
-            <text x="165" y="305" fontSize="8" fill="#000" opacity="0.2">
-              ★
-            </text>
-          </svg>
-        </div>
+          );
+        })}
       </div>
     </section>
   );
